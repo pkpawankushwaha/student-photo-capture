@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Photo Capture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .class-filter {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .class-filter:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .students-grid {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .student-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .student-info {
+            margin-bottom: 15px;
+        }
+
+        .student-info h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .info-value {
+            color: #495057;
+        }
+
+        .capture-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .capture-btn:hover {
+            background: linear-gradient(135deg, #218838, #1ea080);
+            transform: translateY(-2px);
+        }
+
+        .capture-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .camera-icon {
+            font-size: 20px;
+        }
+
+        .no-students {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-students h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Camera Modal Styles */
+        .camera-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .camera-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .camera-preview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .camera-controls button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .capture-photo-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .capture-photo-btn:hover {
+            background: #0056b3;
+        }
+
+        .close-camera-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .close-camera-btn:hover {
+            background: #c82333;
+        }
+
+        .save-photo-btn {
+            background: #28a745;
+            color: white;
+            display: none;
+        }
+
+        .save-photo-btn:hover {
+            background: #218838;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .message.success {
+            background: #28a745;
+        }
+
+        .message.error {
+            background: #dc3545;
+        }
+
+        .message.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .students-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Student Photo Capture</h1>
+            <p>Select a class and capture photos for students</p>
+        </div>
+
+        <div class="controls">
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="classFilter">Filter by Class:</label>
+                    <select id="classFilter" class="class-filter">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        Total: <span id="totalCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        Showing: <span id="showingCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="students-grid" id="studentsGrid">
+            <!-- Students will be populated here -->
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-content">
+            <h3 id="studentName">Student Name</h3>
+            <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
+            <canvas id="photoCanvas" style="display: none;"></canvas>
+            <img id="capturedPhoto" class="camera-preview" style="display: none;">
+            <div class="camera-controls">
+                <button id="capturePhotoBtn" class="capture-photo-btn">📷 Take Photo</button>
+                <button id="savePhotoBtn" class="save-photo-btn">💾 Save Photo</button>
+                <button id="closeCameraBtn" class="close-camera-btn">❌ Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message -->
+    <div id="message" class="message"></div>
+
+    <script>
+        class StudentPhotoCapture {
+            constructor() {
+                this.students = [];
+                this.filteredStudents = [];
+                this.currentStudent = null;
+                this.stream = null;
+                this.capturedImageData = null;
+
+                this.initElements();
+                this.loadStudents();
+                this.bindEvents();
+            }
+
+            initElements() {
+                this.classFilter = document.getElementById('classFilter');
+                this.studentsGrid = document.getElementById('studentsGrid');
+                this.totalCount = document.getElementById('totalCount');
+                this.showingCount = document.getElementById('showingCount');
+                this.cameraModal = document.getElementById('cameraModal');
+                this.cameraPreview = document.getElementById('cameraPreview');
+                this.photoCanvas = document.getElementById('photoCanvas');
+                this.capturedPhoto = document.getElementById('capturedPhoto');
+                this.studentNameElement = document.getElementById('studentName');
+                this.message = document.getElementById('message');
+            }
+
+            async loadStudents() {
+                // Sample student data - replace with your JSON file
+                this.students = [
+                    { adm_no: "ADM001", name: "John Doe", class: "10A", rollNo: "001" },
+                    { adm_no: "ADM002", name: "Jane Smith", class: "10A", rollNo: "002" },
+                    { adm_no: "ADM003", name: "Mike Johnson", class: "10B", rollNo: "001" },
+                    { adm_no: "ADM004", name: "Sarah Wilson", class: "10B", rollNo: "002" },
+                    { adm_no: "ADM005", name: "Tom Brown", class: "9A", rollNo: "001" },
+                    { adm_no: "ADM006", name: "Lisa Davis", class: "9A", rollNo: "002" },
+                    { adm_no: "ADM007", name: "David Miller", class: "9B", rollNo: "001" },
+                    { adm_no: "ADM008", name: "Emily Taylor", class: "9B", rollNo: "002" }
+                ];
+
+                // For loading from external JSON file, uncomment and modify:
+                /*
+                try {
+                    const response = await fetch('students.json');
+                    this.students = await response.json();
+                } catch (error) {
+                    console.error('Error loading students:', error);
+                    this.showMessage('Error loading student data', 'error');
+                }
+                */
+
+                this.populateClassFilter();
+                this.filterStudents();
+            }
+
+            populateClassFilter() {
+                const classes = [...new Set(this.students.map(student => student.class))].sort();
+                
+                this.classFilter.innerHTML = '<option value="">All Classes</option>';
+                classes.forEach(className => {
+                    const option = document.createElement('option');
+                    option.value = className;
+                    option.textContent = className;
+                    this.classFilter.appendChild(option);
+                });
+            }
+
+            filterStudents() {
+                const selectedClass = this.classFilter.value;
+                
+                if (selectedClass === '') {
+                    this.filteredStudents = [...this.students];
+                } else {
+                    this.filteredStudents = this.students.filter(student => student.class === selectedClass);
+                }
+
+                this.updateStats();
+                this.renderStudents();
+            }
+
+            updateStats() {
+                this.totalCount.textContent = this.students.length;
+                this.showingCount.textContent = this.filteredStudents.length;
+            }
+
+            renderStudents() {
+                if (this.filteredStudents.length === 0) {
+                    this.studentsGrid.innerHTML = `
+                        <div class="no-students">
+                            <h3>No students found</h3>
+                            <p>Try selecting a different class or check your data</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.studentsGrid.innerHTML = this.filteredStudents.map(student => `
+                    <div class="student-card">
+                        <div class="student-info">
+                            <h3>${student.name}</h3>
+                            <div class="info-row">
+                                <span class="info-label">Admission No:</span>
+                                <span class="info-value">${student.adm_no}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Class:</span>
+                                <span class="info-value">${student.class}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Roll No:</span>
+                                <span class="info-value">${student.rollNo}</span>
+                            </div>
+                        </div>
+                        <button class="capture-btn" onclick="app.openCamera('${student.adm_no}')">
+                            <span class="camera-icon">📷</span>
+                            Capture Photo
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            async openCamera(admNo) {
+                this.currentStudent = this.students.find(student => student.adm_no === admNo);
+                if (!this.currentStudent) return;
+
+                this.studentNameElement.textContent = this.currentStudent.name;
+                this.cameraModal.style.display = 'flex';
+
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment', // Use back camera on mobile
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    });
+
+                    this.cameraPreview.srcObject = this.stream;
+                    this.cameraPreview.style.display = 'block';
+                    this.capturedPhoto.style.display = 'none';
+                    
+                    document.getElementById('capturePhotoBtn').style.display = 'inline-block';
+                    document.getElementById('savePhotoBtn').style.display = 'none';
+
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    this.showMessage('Failed to access camera', 'error');
+                    this.closeCamera();
+                }
+            }
+
+            capturePhoto() {
+                if (!this.stream || !this.currentStudent) return;
+
+                const canvas = this.photoCanvas;
+                const context = canvas.getContext('2d');
+                
+                canvas.width = this.cameraPreview.videoWidth;
+                canvas.height = this.cameraPreview.videoHeight;
+                
+                context.drawImage(this.cameraPreview, 0, 0, canvas.width, canvas.height);
+                
+                this.capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                this.capturedPhoto.src = this.capturedImageData;
+                this.capturedPhoto.style.display = 'block';
+                this.cameraPreview.style.display = 'none';
+                
+                document.getElementById('capturePhotoBtn').style.display = 'none';
+                document.getElementById('savePhotoBtn').style.display = 'inline-block';
+            }
+
+            savePhoto() {
+                if (!this.capturedImageData || !this.currentStudent) return;
+
+                // Create download link
+                const link = document.createElement('a');
+                link.download = `${this.currentStudent.adm_no}.jpg`;
+                link.href = this.capturedImageData;
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                this.showMessage(`Photo saved as ${this.currentStudent.adm_no}.jpg`, 'success');
+                this.closeCamera();
+            }
+
+            closeCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+
+                this.cameraModal.style.display = 'none';
+                this.capturedImageData = null;
+                this.currentStudent = null;
+            }
+
+            showMessage(text, type = 'success') {
+                this.message.textContent = text;
+                this.message.className = `message ${type} show`;
+                
+                setTimeout(() => {
+                    this.message.classList.remove('show');
+                }, 3000);
+            }
+
+            bindEvents() {
+                this.classFilter.addEventListener('change', () => this.filterStudents());
+                
+                document.getElementById('capturePhotoBtn').addEventListener('click', () => this.capturePhoto());
+                document.getElementById('savePhotoBtn').addEventListener('click', () => this.savePhoto());
+                document.getElementById('closeCameraBtn').addEventListener('click', () => this.closeCamera());
+                
+                // Close modal on background click
+                this.cameraModal.addEventListener('click', (e) => {
+                    if (e.target === this.cameraModal) {
+                        this.closeCamera();
+                    }
+                });
+            }
+        }
+
+        // Initialize the app
+        const app = new StudentPhotoCapture();
+    </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+[
+    {
+        "adm_no": "ADM001",
+        "name": "John Doe",
+        "class": "10A",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM002",
+        "name": "Jane Smith",
+        "class": "10A",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM003",
+        "name": "Mike Johnson",
+        "class": "10B",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM004",
+        "name": "Sarah Wilson",
+        "class": "10B",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM005",
+        "name": "Tom Brown",
+        "class": "9A",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM006",
+        "name": "Lisa Davis",
+        "class": "9A",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM007",
+        "name": "David Miller",
+        "class": "9B",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM008",
+        "name": "Emily Taylor",
+        "class": "9B",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM009",
+        "name": "Robert Anderson",
+        "class": "11A",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM010",
+        "name": "Maria Garcia",
+        "class": "11A",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM011",
+        "name": "Kevin Lee",
+        "class": "11B",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM012",
+        "name": "Amanda White",
+        "class": "11B",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM013",
+        "name": "Christopher Martin",
+        "class": "12A",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM014",
+        "name": "Jessica Thompson",
+        "class": "12A",
+        "rollNo": "002"
+    },
+    {
+        "adm_no": "ADM015",
+        "name": "Daniel Rodriguez",
+        "class": "12B",
+        "rollNo": "001"
+    },
+    {
+        "adm_no": "ADM016",
+        "name": "Ashley Martinez",
+        "class": "12B",
+        "rollNo": "002"
+    }
+]
