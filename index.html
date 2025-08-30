@@ -435,6 +435,7 @@
                     this.filteredStudents = [...this.students];
                 } else {
                     this.filteredStudents = this.students.filter(student => student.class === selectedClass);
+                    this.filteredStudents = this.filteredStudents.sort((a, b) => a.rollNo - b.rollNo)
                 }
 
                 this.updateStats();
