@@ -313,6 +313,9 @@
         <div class="header">
             <h1>📸 Student Photo Capture</h1>
             <p>Select a class and capture photos for students</p>
+            <div id="securityInfo" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.9rem;">
+                📱 <strong>Mobile Users:</strong> Please allow camera permissions when prompted
+            </div>
         </div>
 
         <div class="controls">
@@ -385,28 +388,29 @@
             }
 
             async loadStudents() {
-                // Sample student data - replace with your JSON file
-                this.students = [
-                    { adm_no: "ADM001", name: "John Doe", class: "10A", rollNo: "001" },
-                    { adm_no: "ADM002", name: "Jane Smith", class: "10A", rollNo: "002" },
-                    { adm_no: "ADM003", name: "Mike Johnson", class: "10B", rollNo: "001" },
-                    { adm_no: "ADM004", name: "Sarah Wilson", class: "10B", rollNo: "002" },
-                    { adm_no: "ADM005", name: "Tom Brown", class: "9A", rollNo: "001" },
-                    { adm_no: "ADM006", name: "Lisa Davis", class: "9A", rollNo: "002" },
-                    { adm_no: "ADM007", name: "David Miller", class: "9B", rollNo: "001" },
-                    { adm_no: "ADM008", name: "Emily Taylor", class: "9B", rollNo: "002" }
-                ];
-
-                // For loading from external JSON file, uncomment and modify:
-                /*
+                // Try loading from external JSON file first
                 try {
                     const response = await fetch('students.json');
-                    this.students = await response.json();
+                    if (response.ok) {
+                        this.students = await response.json();
+                        console.log('Loaded students from JSON file:', this.students.length);
+                    } else {
+                        throw new Error('JSON file not found, using sample data');
+                    }
                 } catch (error) {
-                    console.error('Error loading students:', error);
-                    this.showMessage('Error loading student data', 'error');
+                    console.log('Loading sample data:', error.message);
+                    // Fallback to sample student data
+                    this.students = [
+                        { adm_no: "ADM001", name: "John Doe", class: "10A", rollNo: "001" },
+                        { adm_no: "ADM002", name: "Jane Smith", class: "10A", rollNo: "002" },
+                        { adm_no: "ADM003", name: "Mike Johnson", class: "10B", rollNo: "001" },
+                        { adm_no: "ADM004", name: "Sarah Wilson", class: "10B", rollNo: "002" },
+                        { adm_no: "ADM005", name: "Tom Brown", class: "9A", rollNo: "001" },
+                        { adm_no: "ADM006", name: "Lisa Davis", class: "9A", rollNo: "002" },
+                        { adm_no: "ADM007", name: "David Miller", class: "9B", rollNo: "001" },
+                        { adm_no: "ADM008", name: "Emily Taylor", class: "9B", rollNo: "002" }
+                    ];
                 }
-                */
 
                 this.populateClassFilter();
                 this.filterStudents();
@@ -485,25 +489,104 @@
                 this.studentNameElement.textContent = this.currentStudent.name;
                 this.cameraModal.style.display = 'flex';
 
-                try {
-                    this.stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: 'environment', // Use back camera on mobile
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        }
-                    });
+                // Check if camera is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    this.showMessage('Camera not supported on this device/browser', 'error');
+                    this.closeCamera();
+                    return;
+                }
 
-                    this.cameraPreview.srcObject = this.stream;
-                    this.cameraPreview.style.display = 'block';
-                    this.capturedPhoto.style.display = 'none';
-                    
-                    document.getElementById('capturePhotoBtn').style.display = 'inline-block';
-                    document.getElementById('savePhotoBtn').style.display = 'none';
+                // Check if we're on HTTPS
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                    this.showMessage('Camera requires HTTPS. Please ensure you\'re using the HTTPS version of the page.', 'error');
+                    this.closeCamera();
+                    return;
+                }
+
+                try {
+                    // Request camera permission with multiple fallback options
+                    let constraints;
+                    let stream = null;
+
+                    // Try different camera configurations
+                    const cameraConfigs = [
+                        // Config 1: High quality with back camera
+                        {
+                            video: {
+                                facingMode: 'environment',
+                                width: { ideal: 1280, min: 640 },
+                                height: { ideal: 720, min: 480 }
+                            }
+                        },
+                        // Config 2: Front camera
+                        {
+                            video: {
+                                facingMode: 'user',
+                                width: { ideal: 1280, min: 640 },
+                                height: { ideal: 720, min: 480 }
+                            }
+                        },
+                        // Config 3: Any camera with basic quality
+                        {
+                            video: {
+                                width: { ideal: 640 },
+                                height: { ideal: 480 }
+                            }
+                        },
+                        // Config 4: Most basic - any video
+                        { video: true }
+                    ];
+
+                    // Try each configuration until one works
+                    for (let i = 0; i < cameraConfigs.length; i++) {
+                        try {
+                            console.log(`Trying camera config ${i + 1}:`, cameraConfigs[i]);
+                            stream = await navigator.mediaDevices.getUserMedia(cameraConfigs[i]);
+                            console.log(`Camera config ${i + 1} successful`);
+                            break;
+                        } catch (error) {
+                            console.log(`Camera config ${i + 1} failed:`, error);
+                            if (i === cameraConfigs.length - 1) {
+                                throw error; // Last attempt failed
+                            }
+                        }
+                    }
+
+                    if (stream) {
+                        this.stream = stream;
+                        this.cameraPreview.srcObject = stream;
+                        this.cameraPreview.style.display = 'block';
+                        this.capturedPhoto.style.display = 'none';
+                        
+                        document.getElementById('capturePhotoBtn').style.display = 'inline-block';
+                        document.getElementById('savePhotoBtn').style.display = 'none';
+
+                        this.showMessage('Camera ready! You can now take a photo.', 'success');
+                    }
 
                 } catch (error) {
                     console.error('Camera error:', error);
-                    this.showMessage('Failed to access camera', 'error');
+                    let errorMessage = 'Failed to access camera. ';
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'Please allow camera permissions and try again. You may need to click the camera icon in your browser\'s address bar.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage += 'No camera found on this device.';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMessage += 'Camera not supported on this browser. Try using Chrome, Safari, or Firefox.';
+                    } else if (error.name === 'NotReadableError') {
+                        errorMessage += 'Camera is being used by another application. Please close other camera apps and try again.';
+                    } else if (error.name === 'SecurityError') {
+                        errorMessage += 'Security error. Make sure you\'re using HTTPS and have allowed camera permissions.';
+                    } else if (error.name === 'AbortError') {
+                        errorMessage += 'Camera access was aborted. Please try again.';
+                    } else if (error.name === 'OverconstrainedError') {
+                        errorMessage += 'Camera constraints not supported. Your device camera may not support the requested quality.';
+                    } else {
+                        errorMessage += `${error.message}. Try refreshing the page and allowing camera permissions.`;
+                    }
+                    
+                    this.showMessage(errorMessage, 'error');
                     this.closeCamera();
                 }
             }
